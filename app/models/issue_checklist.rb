@@ -4,9 +4,6 @@ class IssueChecklist < ActiveRecord::Base
   has_one :comment, as: :commented, dependent: :delete
   acts_as_list
 
-  attr_accessible :is_done, :subject
-  attr_protected :id
-
   validates_presence_of :subject
 
   # after_save :recalc_issue_done_ratio

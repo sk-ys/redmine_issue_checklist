@@ -4,13 +4,15 @@ module RedmineIssueChecklist
       extend ActiveSupport::Concern
 
       included do
-        alias_method_chain :build_new_issue_from_params, :checklist
+        prepend InstanceMethods
       end
 
-      def build_new_issue_from_params_with_checklist
-        build_new_issue_from_params_without_checklist
-        if User.current.allowed_to?(:edit_checklists, @issue.project)
-          @issue.update_checklist_items(params[:check_list_items])
+      module InstanceMethods
+        def build_new_issue_from_params
+          super
+          if User.current.allowed_to?(:edit_checklists, @issue.project)
+            @issue.update_checklist_items(params[:check_list_items])
+          end
         end
       end
     end

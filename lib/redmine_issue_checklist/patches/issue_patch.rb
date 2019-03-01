@@ -1,22 +1,17 @@
-require_dependency 'issue'
-
 module RedmineIssueChecklist
   module Patches
 
     module IssuePatch
+      extend ActiveSupport::Concern
 
-      def self.included(base) # :nodoc:
-        base.send(:include, InstanceMethods)
-        base.class_eval do
-          alias_method_chain :copy_from, :checklist
-          has_many :checklist, class_name: 'IssueChecklist', dependent: :destroy
-        end
-
+      included do
+        prepend InstanceMethods
+        has_many :checklist, class_name: 'IssueChecklist', dependent: :destroy
       end
 
       module InstanceMethods
-        def copy_from_with_checklist(arg, options={})
-          copy_from_without_checklist(arg, options)
+        def copy_from(arg, options={})
+          super(arg, options)
           issue          = arg.is_a?(Issue) ? arg : Issue.visible.find(arg)
           self.checklist = issue.checklist.map { |cl| cl.dup }
           self.checklist.each do |object|
