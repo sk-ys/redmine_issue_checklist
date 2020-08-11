@@ -15,7 +15,11 @@ module RedmineIssueChecklist
           return ret unless self.checklist.empty?
           issue = @copied_from || (arg.is_a?(Issue) ? arg : Issue.visible.find(arg))
           @issue_checklist_copied = issue.checklist.map do |c|
-            c.attributes.symbolize_keys.slice(:subject).merge is_done: false
+            attrs = c.attributes.symbolize_keys
+            # Append for programmatic use, e.g. in issue.copy
+            self.checklist << IssueChecklist.new(attrs.except(:id).merge is_done: false)
+            # Save params-like slice for processing in update_checklist_items
+            attrs.slice(:subject).merge is_done: false
           end
           ret
         end
