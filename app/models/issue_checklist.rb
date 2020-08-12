@@ -4,6 +4,8 @@ class IssueChecklist < ActiveRecord::Base
   has_one :comment, as: :commented, dependent: :delete
   acts_as_list
 
+  default_scope -> { order(position: :asc)}
+
   validates_presence_of :subject
 
   # after_save :recalc_issue_done_ratio
