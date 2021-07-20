@@ -34,7 +34,7 @@ module RedmineIssueChecklist
           checklist_items.unshift *copied
 
           checklist.destroy_all
-          checklist << checklist_items.collect do |cli|
+          checklist << checklist_items.select { |c| c[:empty_list_dummy].blank? }.collect do |cli|
             IssueChecklist.new(is_done: cli[:is_done], subject: cli[:subject])
           end
 

@@ -2,6 +2,8 @@
   <div class="tabular">
     <p id="issue_checklist_form">
       <label><%= l(:label_issue_checklist_plural) %></label>
+      <%= hidden_field_tag 'check_list_items[][empty_list_dummy]', '_empty_list_'%>
+      <%= hidden_field_tag 'check_list_items[][subject]', '_empty_list_'%>
       <span id="checklist_form_items"> </span>
       <%= text_field_tag 'new_checklist', '',
           id: 'add_checklist_item_input' %>
