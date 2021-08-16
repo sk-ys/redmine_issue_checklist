@@ -22,20 +22,23 @@ module RedmineIssueChecklist
     class ModelIssueHook < Redmine::Hook::ViewListener
 
       def controller_issues_edit_before_save(context={})
-        if User.current.allowed_to?(:edit_checklists, context[:issue].project)
-          save_checklist_to_issue(context, RedmineIssueChecklist.settings[:save_log])
+        if (iss = context[:issue]) && User.current.allowed_to?(:edit_checklists, iss.project)
+          save_checklist_to_issue(context, iss, RedmineIssueChecklist.settings[:save_log])
         end
       end
 
       def controller_issues_new_after_save(context={})
-        if User.current.allowed_to?(:edit_checklists, context[:issue].project)
-          save_checklist_to_issue(context, false)
-          context[:issue].save
+        if (iss = context[:issue]) && User.current.allowed_to?(:edit_checklists, iss.project)
+          save_checklist_to_issue(context, iss, false)
+          if iss.copy? # simply saving will cause a stale record error
+            iss.checklist.each &:save!
+          else
+            iss.save
+          end
         end
       end
 
-      def save_checklist_to_issue(context, create_journal)
-        issue = context[:issue]
+      def save_checklist_to_issue(context, issue, create_journal)
         checklist_items = context[:params] && context[:params][:check_list_items]
         issue.update_checklist_items(checklist_items, create_journal) if issue && checklist_items
       end
