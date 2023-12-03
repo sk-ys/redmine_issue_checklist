@@ -28,13 +28,20 @@ module RedmineIssueChecklist
       end
 
       def controller_issues_new_after_save(context={})
-        if (iss = context[:issue]) && User.current.allowed_to?(:edit_checklists, iss.project)
-          save_checklist_to_issue(context, iss, false)
-          if iss.copy? # simply saving will cause a stale record error
-            iss.checklist.each &:save!
-          else
-            iss.save
+        begin
+          if (iss = context[:issue]) && User.current.allowed_to?(:edit_checklists, iss.project)
+            save_checklist_to_issue(context, iss, false)
+            begin
+              iss.save
+            rescue
+              # this naive save caused an ActiveRecord stale record error
+              # SO we simply save each checklist item individually
+              iss.checklist.each &:save!
+            end
           end
+        rescue => e
+          Rails.logger.error e.to_s
+          Rails.logger.error e.backtrace
         end
       end
 
